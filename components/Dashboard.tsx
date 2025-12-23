@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Employee, VacationEntry } from '../types';
 import { getEmployees, getVacations } from '../services/dataService';
-import { Users, CalendarRange, Clock, Calculator } from 'lucide-react';
+import { Users, CalendarRange, Clock } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
