@@ -11,9 +11,24 @@ const INITIAL_EMPLOYEES: Employee[] = [
     startDate: '2025-01-13',
     endDate: '2026-02-13',
     manMonths: 13.1,
-    totalVacationDays: 15, // Standard assumption, editable
+    totalVacationDays: 13.1, 
   }
 ];
+
+export const calculateManMonths = (start: string, end: string): number => {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0;
+  
+  const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+  
+  // Approximate 1 month as 30 days for MM calculation as per common project standards
+  // +1 day to be inclusive if needed, but using raw diff for now.
+  const mm = (diffDays / 30.4).toFixed(1); 
+  return parseFloat(mm);
+};
 
 export const getEmployees = (): Employee[] => {
   const data = localStorage.getItem(STORAGE_KEY_EMPLOYEES);
@@ -33,6 +48,22 @@ export const saveEmployee = (employee: Employee): void => {
     employees.push(employee);
   }
   localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(employees));
+};
+
+// Update existing employee (explicit naming for clarity)
+export const updateEmployee = (employee: Employee): void => {
+  saveEmployee(employee);
+};
+
+export const deleteEmployee = (id: string): void => {
+  let employees = getEmployees();
+  employees = employees.filter(e => e.id !== id);
+  localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(employees));
+  
+  // Also cleanup vacations for this employee
+  let vacations = getVacations();
+  vacations = vacations.filter(v => v.employeeId !== id);
+  localStorage.setItem(STORAGE_KEY_VACATIONS, JSON.stringify(vacations));
 };
 
 export const getVacations = (): VacationEntry[] => {
