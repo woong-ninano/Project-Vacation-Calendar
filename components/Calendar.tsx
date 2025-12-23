@@ -4,8 +4,8 @@ import { getEmployees, getVacations, removeVacation, getHolidays } from '../serv
 import { Employee, VacationEntry, VacationType, Holiday } from '../types';
 
 export const CalendarView: React.FC = () => {
-  // Initialize with 2025-01-01 as requested
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 0, 1));
+  // Initialize with current date as requested
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [vacations, setVacations] = useState<VacationEntry[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -124,7 +124,7 @@ export const CalendarView: React.FC = () => {
                   className={`text-[10px] md:text-xs px-1.5 py-1 rounded-md flex items-center justify-between border shadow-sm ${badgeStyle}`}
                 >
                   <span className="font-bold truncate mr-1">{empName}</span>
-                  <span className="opacity-80 text-[10px] whitespace-nowrap">{vac.type}</span>
+                  <span className="opacity-80 text-[10px] whitespace-nowrap hidden md:inline-block">{vac.type}</span>
                 </div>
               );
             })}
