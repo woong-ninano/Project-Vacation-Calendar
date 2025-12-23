@@ -4,7 +4,8 @@ import { getEmployees, getVacations, removeVacation, getHolidays } from '../serv
 import { Employee, VacationEntry, VacationType, Holiday } from '../types';
 
 export const CalendarView: React.FC = () => {
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 0, 1));
+  // Initialize with current date instead of fixed date
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [vacations, setVacations] = useState<VacationEntry[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -57,6 +58,10 @@ export const CalendarView: React.FC = () => {
     const daysInMonth = getDaysInMonth(year, month);
     const startDay = getFirstDayOfMonth(year, month);
     
+    // Calculate today's date string for highlighting
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
     const days = [];
     
     // Empty cells
@@ -72,17 +77,24 @@ export const CalendarView: React.FC = () => {
       
       const holiday = holidays.find(h => h.date === dateStr);
       const isHoliday = !!holiday;
+      const isToday = dateStr === todayStr;
 
       // Text Color Logic
       let dateTextColor = 'text-gray-700';
       if (isWeekend) dateTextColor = 'text-red-400';
       if (isHoliday) dateTextColor = 'text-red-600';
+      if (isToday) dateTextColor = 'text-blue-700 font-bold';
+
+      // Background Color Logic
+      let cellBgClass = 'bg-white';
+      if (isWeekend || isHoliday) cellBgClass = 'bg-slate-50/50';
+      if (isToday) cellBgClass = 'bg-blue-50 ring-1 ring-inset ring-blue-300';
 
       days.push(
         <div 
           key={day} 
           onClick={() => handleDayClick(dateStr)}
-          className={`min-h-[80px] md:min-h-[100px] p-1 border-r border-b border-gray-100 cursor-pointer transition-colors active:bg-gray-100 ${isWeekend || isHoliday ? 'bg-slate-50/50' : 'bg-white'}`}
+          className={`min-h-[80px] md:min-h-[100px] p-1 border-r border-b border-gray-100 cursor-pointer transition-colors active:bg-gray-100 ${cellBgClass}`}
         >
           <div className="flex justify-between items-start mb-1">
             <span className={`text-xs md:text-sm font-semibold pl-1 ${dateTextColor}`}>
@@ -92,6 +104,9 @@ export const CalendarView: React.FC = () => {
               <span className="text-[10px] text-red-500 font-medium pr-1 truncate max-w-[60px] md:max-w-none text-right">
                 {holiday.name}
               </span>
+            )}
+            {isToday && !isHoliday && (
+              <span className="text-[10px] text-blue-600 font-medium pr-1">오늘</span>
             )}
           </div>
 
