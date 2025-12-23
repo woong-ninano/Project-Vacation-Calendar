@@ -40,7 +40,7 @@ function App() {
             </div>
             <div className="flex space-x-1 sm:space-x-2 items-center justify-between sm:justify-end w-full sm:w-auto bg-gray-50 sm:bg-transparent p-1 sm:p-0 rounded-lg">
               <NavButton tab={Tab.CALENDAR} label="월별 캘린더" icon={Calendar} />
-              <NavButton tab={Tab.DASHBOARD} label="현황 대시보드" icon={LayoutDashboard} />
+              <NavButton tab={Tab.DASHBOARD} label="인원 현황" icon={LayoutDashboard} />
               <NavButton tab={Tab.REGISTER} label="휴가 등록" icon={PlusCircle} />
             </div>
           </div>
