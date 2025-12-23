@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X, Calendar as CalendarIcon, Trash2 } from 'lucide-react';
-import { getEmployees, getVacations, removeVacation } from '../services/dataService';
-import { Employee, VacationEntry, VacationType } from '../types';
+import { getEmployees, getVacations, removeVacation, getHolidays } from '../services/dataService';
+import { Employee, VacationEntry, VacationType, Holiday } from '../types';
 
 export const CalendarView: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 0, 1));
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [vacations, setVacations] = useState<VacationEntry[]>([]);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [tick, setTick] = useState(0);
 
   // Modal State
@@ -16,6 +17,7 @@ export const CalendarView: React.FC = () => {
   useEffect(() => {
     setEmployees(getEmployees());
     setVacations(getVacations());
+    setHolidays(getHolidays());
   }, [tick]);
 
   useEffect(() => {
@@ -67,16 +69,32 @@ export const CalendarView: React.FC = () => {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const dayVacations = vacations.filter(v => v.date === dateStr);
       const isWeekend = new Date(year, month, day).getDay() === 0 || new Date(year, month, day).getDay() === 6;
+      
+      const holiday = holidays.find(h => h.date === dateStr);
+      const isHoliday = !!holiday;
+
+      // Text Color Logic
+      let dateTextColor = 'text-gray-700';
+      if (isWeekend) dateTextColor = 'text-red-400';
+      if (isHoliday) dateTextColor = 'text-red-600';
 
       days.push(
         <div 
           key={day} 
           onClick={() => handleDayClick(dateStr)}
-          className={`min-h-[80px] md:min-h-[100px] p-1 border-r border-b border-gray-100 cursor-pointer transition-colors active:bg-gray-100 ${isWeekend ? 'bg-slate-50/50' : 'bg-white'}`}
+          className={`min-h-[80px] md:min-h-[100px] p-1 border-r border-b border-gray-100 cursor-pointer transition-colors active:bg-gray-100 ${isWeekend || isHoliday ? 'bg-slate-50/50' : 'bg-white'}`}
         >
-          <span className={`text-xs md:text-sm font-semibold block mb-1 pl-1 ${isWeekend ? 'text-red-400' : 'text-gray-700'}`}>
-            {day}
-          </span>
+          <div className="flex justify-between items-start mb-1">
+            <span className={`text-xs md:text-sm font-semibold pl-1 ${dateTextColor}`}>
+              {day}
+            </span>
+            {isHoliday && (
+              <span className="text-[10px] text-red-500 font-medium pr-1 truncate max-w-[60px] md:max-w-none text-right">
+                {holiday.name}
+              </span>
+            )}
+          </div>
+
           <div className="flex flex-col gap-0.5">
             {dayVacations.map(vac => {
               const empName = employees.find(e => e.id === vac.employeeId)?.name || 'Unknown';
@@ -109,14 +127,18 @@ export const CalendarView: React.FC = () => {
     const dayVacations = vacations.filter(v => v.date === selectedDate);
     const dateObj = new Date(selectedDate);
     const formattedDate = `${dateObj.getFullYear()}년 ${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일`;
+    const holiday = holidays.find(h => h.date === selectedDate);
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
           <div className="bg-gray-50 px-5 py-4 border-b border-gray-100 flex justify-between items-center">
-             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-               <CalendarIcon size={18} className="text-blue-600"/> {formattedDate}
-             </h3>
+             <div className="flex flex-col">
+               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                 <CalendarIcon size={18} className="text-blue-600"/> {formattedDate}
+               </h3>
+               {holiday && <span className="text-xs text-red-500 font-medium ml-7">{holiday.name}</span>}
+             </div>
              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors">
                <X size={20} />
              </button>

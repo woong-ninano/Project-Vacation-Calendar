@@ -28,3 +28,8 @@ export interface VacationEntry {
   type: VacationType;
   cost: number;
 }
+
+export interface Holiday {
+  date: string; // YYYY-MM-DD
+  name: string;
+}
