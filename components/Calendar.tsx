@@ -4,8 +4,8 @@ import { getEmployees, getVacations, removeVacation, getHolidays } from '../serv
 import { Employee, VacationEntry, VacationType, Holiday } from '../types';
 
 export const CalendarView: React.FC = () => {
-  // Initialize with current date instead of fixed date
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Initialize with 2025-01-01 as requested
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 0, 1));
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [vacations, setVacations] = useState<VacationEntry[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -110,22 +110,21 @@ export const CalendarView: React.FC = () => {
             )}
           </div>
 
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-1">
             {dayVacations.map(vac => {
               const empName = employees.find(e => e.id === vac.employeeId)?.name || 'Unknown';
               
-              let badgeStyle = 'bg-blue-50 text-blue-700';
-              if (vac.type.includes('반차')) badgeStyle = 'bg-amber-50 text-amber-700';
-              if (vac.type === VacationType.QUARTER) badgeStyle = 'bg-purple-50 text-purple-700';
+              let badgeStyle = 'bg-blue-50 text-blue-700 border-blue-100';
+              if (vac.type.includes('반차')) badgeStyle = 'bg-amber-50 text-amber-700 border-amber-100';
+              if (vac.type === VacationType.QUARTER) badgeStyle = 'bg-purple-50 text-purple-700 border-purple-100';
 
               return (
                 <div 
                   key={vac.id} 
-                  className={`text-[10px] md:text-xs px-1 py-0.5 rounded flex items-center justify-between ${badgeStyle}`}
+                  className={`text-[10px] md:text-xs px-1.5 py-1 rounded-md flex items-center justify-between border shadow-sm ${badgeStyle}`}
                 >
-                  <span className="truncate w-full leading-tight">
-                    {empName} <span className="opacity-75">{vac.type}</span>
-                  </span>
+                  <span className="font-bold truncate mr-1">{empName}</span>
+                  <span className="opacity-80 text-[10px] whitespace-nowrap">{vac.type}</span>
                 </div>
               );
             })}
@@ -167,15 +166,15 @@ export const CalendarView: React.FC = () => {
                 {dayVacations.map(vac => {
                   const empName = employees.find(e => e.id === vac.employeeId)?.name || '미확인';
                   
-                  let typeColor = 'text-blue-600 bg-blue-50';
-                  if (vac.type.includes('반차')) typeColor = 'text-amber-600 bg-amber-50';
-                  if (vac.type === VacationType.QUARTER) typeColor = 'text-purple-600 bg-purple-50';
+                  let typeColor = 'text-blue-600 bg-blue-50 border-blue-100';
+                  if (vac.type.includes('반차')) typeColor = 'text-amber-600 bg-amber-50 border-amber-100';
+                  if (vac.type === VacationType.QUARTER) typeColor = 'text-purple-600 bg-purple-50 border-purple-100';
 
                   return (
                     <li key={vac.id} className="flex items-center justify-between bg-white border border-gray-100 p-3 rounded-lg shadow-sm">
                       <div className="flex flex-col">
-                        <span className="font-bold text-gray-800">{empName}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full w-fit mt-1 ${typeColor}`}>
+                        <span className="font-bold text-gray-800 text-lg">{empName}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full w-fit mt-1 border ${typeColor}`}>
                           {vac.type}
                         </span>
                       </div>
