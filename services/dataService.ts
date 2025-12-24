@@ -1,7 +1,7 @@
 import { Employee, VacationEntry, VacationType, VACATION_COST, Holiday } from '../types';
 
-const STORAGE_KEY_EMPLOYEES = 'pvc_employees_v4';
-const STORAGE_KEY_VACATIONS = 'pvc_vacations_v4';
+const STORAGE_KEY_EMPLOYEES = 'pvc_employees_v5';
+const STORAGE_KEY_VACATIONS = 'pvc_vacations_v5';
 
 export const calculateManMonths = (start: string, end: string): number => {
   const startDate = new Date(start);
@@ -42,126 +42,8 @@ const INITIAL_EMPLOYEES: Employee[] = [
   createInitialEmployee('emp_9', '김미나', '2025-02-03', '2026-02-13'),
 ];
 
-// Helper to seed vacations
-let vacIdCounter = 1;
-const mkVac = (empId: string, date: string, type: VacationType): VacationEntry => ({
-  id: `vac_seed_${vacIdCounter++}`,
-  employeeId: empId,
-  date,
-  type,
-  cost: VACATION_COST[type]
-});
-
-// Mapping for readability
-const ID = {
-  Jang: 'emp_1',
-  Park: 'emp_10',
-  LeeK: 'emp_2',
-  KimS: 'emp_3',
-  LeeM: 'emp_4',
-  LeeH: 'emp_5',
-  KimH: 'emp_6',
-  Jeon: 'emp_7',
-  KimJ: 'emp_8',
-  KimM: 'emp_9'
-};
-
-const INITIAL_VACATIONS: VacationEntry[] = [
-  // 2025-01
-  mkVac(ID.LeeH, '2025-01-31', VacationType.FULL),
-  mkVac(ID.KimH, '2025-01-31', VacationType.FULL),
-
-  // 2025-02
-  mkVac(ID.LeeH, '2025-02-14', VacationType.FULL),
-  mkVac(ID.KimH, '2025-02-25', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-02-27', VacationType.HALF_PM),
-  mkVac(ID.Jeon, '2025-02-28', VacationType.FULL),
-
-  // 2025-03
-  mkVac(ID.KimM, '2025-03-17', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-03-21', VacationType.HALF_PM),
-  mkVac(ID.KimJ, '2025-03-24', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-03-27', VacationType.QUARTER),
-  mkVac(ID.KimH, '2025-03-28', VacationType.QUARTER), // PDF 감하영 -> 김하영 corrected
-
-  // 2025-04
-  mkVac(ID.Jeon, '2025-04-17', VacationType.QUARTER),
-  mkVac(ID.KimH, '2025-04-22', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-04-28', VacationType.FULL),
-
-  // 2025-05
-  mkVac(ID.Jeon, '2025-05-02', VacationType.FULL),
-  mkVac(ID.KimM, '2025-05-19', VacationType.FULL),
-  mkVac(ID.KimM, '2025-05-20', VacationType.FULL),
-  mkVac(ID.KimH, '2025-05-23', VacationType.HALF_PM),
-
-  // 2025-06
-  mkVac(ID.Jeon, '2025-06-02', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-06-13', VacationType.HALF_PM),
-  mkVac(ID.KimM, '2025-06-16', VacationType.FULL),
-  mkVac(ID.KimJ, '2025-06-17', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-06-27', VacationType.QUARTER),
-
-  // 2025-07
-  mkVac(ID.KimH, '2025-07-04', VacationType.FULL),
-  mkVac(ID.KimJ, '2025-07-09', VacationType.FULL),
-  mkVac(ID.KimM, '2025-07-14', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-07-21', VacationType.HALF_AM),
-
-  // 2025-08
-  mkVac(ID.KimH, '2025-08-01', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-08-04', VacationType.FULL),
-  mkVac(ID.KimH, '2025-08-04', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-08-05', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-08-06', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-08-11', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-08-12', VacationType.FULL),
-  mkVac(ID.KimJ, '2025-08-18', VacationType.FULL),
-  mkVac(ID.KimH, '2025-08-22', VacationType.HALF_PM),
-  mkVac(ID.KimJ, '2025-08-22', VacationType.QUARTER),
-  mkVac(ID.KimM, '2025-08-25', VacationType.FULL),
-
-  // 2025-09
-  mkVac(ID.KimH, '2025-09-03', VacationType.QUARTER),
-  mkVac(ID.KimH, '2025-09-08', VacationType.FULL),
-  mkVac(ID.KimM, '2025-09-10', VacationType.FULL),
-  mkVac(ID.KimJ, '2025-09-12', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-09-16', VacationType.QUARTER),
-  mkVac(ID.KimJ, '2025-09-17', VacationType.HALF_AM),
-  mkVac(ID.KimH, '2025-09-18', VacationType.HALF_AM),
-  mkVac(ID.Jeon, '2025-09-23', VacationType.FULL),
-  mkVac(ID.KimJ, '2025-09-23', VacationType.HALF_AM),
-  mkVac(ID.LeeH, '2025-09-26', VacationType.FULL),
-  mkVac(ID.KimJ, '2025-09-29', VacationType.FULL),
-
-  // 2025-10
-  mkVac(ID.LeeH, '2025-10-10', VacationType.FULL),
-  mkVac(ID.KimH, '2025-10-10', VacationType.FULL),
-  mkVac(ID.KimM, '2025-10-10', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-10-14', VacationType.QUARTER),
-  mkVac(ID.KimJ, '2025-10-15', VacationType.FULL),
-  mkVac(ID.KimH, '2025-10-27', VacationType.HALF_PM),
-
-  // 2025-11
-  mkVac(ID.KimH, '2025-11-14', VacationType.HALF_AM),
-  mkVac(ID.KimJ, '2025-11-17', VacationType.FULL),
-  mkVac(ID.LeeH, '2025-11-24', VacationType.HALF_AM),
-  mkVac(ID.KimH, '2025-11-24', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-11-28', VacationType.FULL),
-
-  // 2025-12
-  mkVac(ID.LeeH, '2025-12-01', VacationType.FULL),
-  mkVac(ID.KimH, '2025-12-05', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-12-19', VacationType.FULL),
-  mkVac(ID.Jeon, '2025-12-26', VacationType.FULL),
-  mkVac(ID.KimM, '2025-12-26', VacationType.FULL),
-  mkVac(ID.KimJ, '2025-12-29', VacationType.FULL),
-  mkVac(ID.KimH, '2025-12-30', VacationType.FULL),
-  mkVac(ID.KimH, '2025-12-31', VacationType.FULL),
-
-  // 2026-01
-  mkVac(ID.KimH, '2026-01-02', VacationType.FULL),
-];
+// Empty initial vacations as requested
+const INITIAL_VACATIONS: VacationEntry[] = [];
 
 const HOLIDAYS: Holiday[] = [
   { date: '2025-01-01', name: '신정' },
@@ -169,7 +51,7 @@ const HOLIDAYS: Holiday[] = [
   { date: '2025-01-29', name: '설날' },
   { date: '2025-01-30', name: '설날 연휴' },
   { date: '2025-03-01', name: '3·1절' },
-  { date: '2025-03-03', name: '대체공휴일(3·1절)' }, // 관공서 공휴일 규정 확인 필요, 편의상 추가 혹은 제거. 2025년 3.1절은 토요일이나 대체공휴일 대상 아님. 하지만 달력 표기 위해 빨간날로 처리하고 싶다면 포함. (정확히는 제외가 맞으나, 일단 사용자 요청 "공휴일 정보"에 따름) -> 3.1절은 대체공휴일 확대 적용 대상임 (2025년부터 적용 가능성 높음). 보수적으로 포함.
+  { date: '2025-03-03', name: '대체공휴일(3·1절)' }, 
   { date: '2025-05-05', name: '어린이날' },
   { date: '2025-05-06', name: '부처님오신날' },
   { date: '2025-06-06', name: '현충일' },
@@ -178,7 +60,7 @@ const HOLIDAYS: Holiday[] = [
   { date: '2025-10-05', name: '추석 연휴' },
   { date: '2025-10-06', name: '추석' },
   { date: '2025-10-07', name: '추석 연휴' },
-  { date: '2025-10-08', name: '대체공휴일(추석)' }, // 10.5(일)이 추석연휴이므로 10.8 대체
+  { date: '2025-10-08', name: '대체공휴일(추석)' }, 
   { date: '2025-10-09', name: '한글날' },
   { date: '2025-12-25', name: '크리스마스' },
   { date: '2026-01-01', name: '신정' },
@@ -233,7 +115,7 @@ export const getVacations = (): VacationEntry[] => {
 export const addVacation = (employeeId: string, date: string, type: VacationType): void => {
   const vacations = getVacations();
   const newEntry: VacationEntry = {
-    id: `vac_${Date.now()}`,
+    id: `vac_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     employeeId,
     date,
     type,

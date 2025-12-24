@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Employee, VacationType } from '../types';
 import { getEmployees, addVacation } from '../services/dataService';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, CalendarDays, ArrowRight } from 'lucide-react';
 
 export const VacationForm: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   
   // Vacation Entry State
   const [selectedEmpId, setSelectedEmpId] = useState<string>('');
-  const [vacationDate, setVacationDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  
+  // Changed to Start/End dates
+  const today = new Date().toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState<string>(today);
+  const [endDate, setEndDate] = useState<string>(today);
+  
   const [vacationType, setVacationType] = useState<VacationType>(VacationType.FULL);
 
   const refreshData = () => {
@@ -27,19 +32,45 @@ export const VacationForm: React.FC = () => {
     e.preventDefault();
     if (!selectedEmpId) return;
     
-    addVacation(selectedEmpId, vacationDate, vacationType);
+    // Validate Dates
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end < start) {
+      alert('종료일은 시작일보다 빠를 수 없습니다.');
+      return;
+    }
+
+    // Iterate through dates
+    let currentDate = new Date(start);
+    let count = 0;
+
+    while (currentDate <= end) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      addVacation(selectedEmpId, dateStr, vacationType);
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+      count++;
+    }
+
     window.dispatchEvent(new Event('data-updated'));
-    alert('휴가가 정상적으로 등록되었습니다.');
+    alert(`총 ${count}일의 휴가가 등록되었습니다.`);
+    
+    // Reset dates to today
+    setStartDate(today);
+    setEndDate(today);
   };
 
   return (
     <div className="p-4 max-w-lg mx-auto">
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
           <PlusCircle className="w-6 h-6 text-indigo-600" />
           휴가 등록
         </h3>
         <form onSubmit={handleVacationSubmit} className="space-y-6">
+          {/* Employee Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">이름 선택</label>
             <div className="relative">
@@ -62,16 +93,42 @@ export const VacationForm: React.FC = () => {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">날짜</label>
-            <input 
-              type="date"
-              value={vacationDate}
-              onChange={(e) => setVacationDate(e.target.value)}
-              className="w-full rounded-lg border-gray-300 border p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-            />
+          {/* Date Selection (Range) */}
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+              <CalendarDays className="w-4 h-4 text-gray-500" /> 날짜 선택 (기간)
+            </label>
+            <div className="flex flex-col md:flex-row gap-2 items-center">
+              <div className="w-full">
+                <span className="text-xs text-gray-500 mb-1 block md:hidden">시작일</span>
+                <input 
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full rounded-lg border-gray-300 border p-2 text-base focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+              
+              <ArrowRight className="text-gray-400 rotate-90 md:rotate-0" size={20} />
+              
+              <div className="w-full">
+                <span className="text-xs text-gray-500 mb-1 block md:hidden">종료일</span>
+                <input 
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate}
+                  className="w-full rounded-lg border-gray-300 border p-2 text-base focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              * 여러 날짜를 선택하려면 시작일과 종료일을 다르게 설정하세요.<br/>
+              * 주말이 포함된 경우 모두 등록되니 확인 후 캘린더에서 삭제하세요.
+            </p>
           </div>
 
+          {/* Vacation Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">휴가 종류</label>
             <div className="grid grid-cols-2 gap-3">
