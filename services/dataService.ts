@@ -1,7 +1,7 @@
 import { Employee, VacationEntry, VacationType, VACATION_COST, Holiday } from '../types';
 
-const STORAGE_KEY_EMPLOYEES = 'pvc_employees_v5';
-const STORAGE_KEY_VACATIONS = 'pvc_vacations_v5';
+const STORAGE_KEY_EMPLOYEES = 'pvc_employees_v6';
+const STORAGE_KEY_VACATIONS = 'pvc_vacations_v6';
 
 export const calculateManMonths = (start: string, end: string): number => {
   const startDate = new Date(start);
@@ -42,8 +42,192 @@ const INITIAL_EMPLOYEES: Employee[] = [
   createInitialEmployee('emp_9', '김미나', '2025-02-03', '2026-02-13'),
 ];
 
-// Empty initial vacations as requested
-const INITIAL_VACATIONS: VacationEntry[] = [];
+// Helper to seed vacations
+let vacIdCounter = 1;
+const mkVac = (empId: string, date: string, type: VacationType): VacationEntry => ({
+  id: `vac_seed_v6_${vacIdCounter++}`,
+  employeeId: empId,
+  date,
+  type,
+  cost: VACATION_COST[type]
+});
+
+// Mapping for readability
+const ID = {
+  Jang: 'emp_1',
+  Park: 'emp_10',
+  LeeK: 'emp_2',
+  KimS: 'emp_3',
+  LeeM: 'emp_4',
+  LeeH: 'emp_5',
+  KimH: 'emp_6',
+  Jeon: 'emp_7',
+  KimJ: 'emp_8',
+  KimM: 'emp_9'
+};
+
+const INITIAL_VACATIONS: VacationEntry[] = [
+  // 2025-01
+  mkVac(ID.Jang, '2025-01-31', VacationType.FULL),
+  mkVac(ID.Park, '2025-01-31', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-01-31', VacationType.FULL),
+  mkVac(ID.KimS, '2025-01-31', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-01-31', VacationType.FULL),
+  mkVac(ID.KimH, '2025-01-31', VacationType.FULL),
+  // 2025-02
+  mkVac(ID.LeeK, '2025-02-12', VacationType.HALF_AM),
+  mkVac(ID.LeeH, '2025-02-14', VacationType.FULL),
+  mkVac(ID.KimS, '2025-02-19', VacationType.HALF_AM),
+  mkVac(ID.KimH, '2025-02-25', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-02-27', VacationType.HALF_PM),
+  mkVac(ID.Jeon, '2025-02-28', VacationType.FULL),
+  // 2025-03
+  mkVac(ID.LeeK, '2025-03-04', VacationType.HALF_AM),
+  mkVac(ID.KimM, '2025-03-17', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-03-19', VacationType.FULL),
+  mkVac(ID.KimS, '2025-03-21', VacationType.HALF_PM),
+  mkVac(ID.LeeH, '2025-03-21', VacationType.HALF_PM),
+  mkVac(ID.Jang, '2025-03-24', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-03-24', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-03-27', VacationType.QUARTER),
+  mkVac(ID.KimH, '2025-03-28', VacationType.QUARTER),
+  mkVac(ID.Park, '2025-03-31', VacationType.HALF_PM),
+  mkVac(ID.KimS, '2025-03-31', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-03-31', VacationType.QUARTER),
+  // 2025-04
+  mkVac(ID.Jang, '2025-04-11', VacationType.QUARTER),
+  mkVac(ID.LeeM, '2025-04-15', VacationType.QUARTER),
+  mkVac(ID.Jeon, '2025-04-17', VacationType.QUARTER),
+  mkVac(ID.LeeM, '2025-04-18', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-04-22', VacationType.FULL),
+  mkVac(ID.KimH, '2025-04-22', VacationType.FULL),
+  mkVac(ID.Park, '2025-04-23', VacationType.FULL),
+  mkVac(ID.KimS, '2025-04-23', VacationType.QUARTER),
+  mkVac(ID.KimS, '2025-04-28', VacationType.HALF_AM),
+  mkVac(ID.LeeH, '2025-04-28', VacationType.FULL),
+  // 2025-05
+  mkVac(ID.Jang, '2025-05-02', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-05-02', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-05-02', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-05-02', VacationType.FULL),
+  mkVac(ID.Park, '2025-05-07', VacationType.HALF_PM),
+  mkVac(ID.KimM, '2025-05-19', VacationType.FULL),
+  mkVac(ID.KimM, '2025-05-20', VacationType.FULL),
+  mkVac(ID.Jang, '2025-05-23', VacationType.FULL),
+  mkVac(ID.KimH, '2025-05-23', VacationType.HALF_PM),
+  // 2025-06
+  mkVac(ID.Jeon, '2025-06-02', VacationType.FULL),
+  mkVac(ID.KimS, '2025-06-04', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-06-09', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-06-09', VacationType.FULL),
+  mkVac(ID.Jang, '2025-06-13', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-06-13', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-06-13', VacationType.HALF_PM),
+  mkVac(ID.KimM, '2025-06-16', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-06-17', VacationType.FULL),
+  mkVac(ID.Park, '2025-06-27', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-06-27', VacationType.QUARTER),
+  // 2025-07
+  mkVac(ID.LeeM, '2025-07-02', VacationType.FULL),
+  mkVac(ID.KimS, '2025-07-04', VacationType.HALF_PM),
+  mkVac(ID.KimH, '2025-07-04', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-07-09', VacationType.FULL),
+  mkVac(ID.Park, '2025-07-11', VacationType.HALF_PM),
+  mkVac(ID.LeeK, '2025-07-14', VacationType.FULL),
+  mkVac(ID.KimM, '2025-07-14', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-07-18', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-07-21', VacationType.HALF_AM),
+  // 2025-08
+  mkVac(ID.Jang, '2025-08-01', VacationType.FULL),
+  mkVac(ID.KimH, '2025-08-01', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-08-04', VacationType.FULL),
+  mkVac(ID.KimH, '2025-08-04', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-08-05', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-08-05', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-08-06', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-08-11', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-08-11', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-08-12', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-08-12', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-08-18', VacationType.FULL),
+  mkVac(ID.KimS, '2025-08-22', VacationType.FULL),
+  mkVac(ID.KimH, '2025-08-22', VacationType.HALF_PM),
+  mkVac(ID.KimJ, '2025-08-22', VacationType.QUARTER),
+  mkVac(ID.KimM, '2025-08-25', VacationType.FULL),
+  mkVac(ID.Jang, '2025-08-28', VacationType.HALF_PM),
+  mkVac(ID.KimS, '2025-08-29', VacationType.QUARTER),
+  // 2025-09
+  mkVac(ID.LeeM, '2025-09-01', VacationType.QUARTER),
+  mkVac(ID.Park, '2025-09-03', VacationType.QUARTER),
+  mkVac(ID.KimH, '2025-09-03', VacationType.QUARTER),
+  mkVac(ID.Jang, '2025-09-05', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-09-05', VacationType.QUARTER),
+  mkVac(ID.KimS, '2025-09-08', VacationType.FULL),
+  mkVac(ID.KimH, '2025-09-08', VacationType.FULL),
+  mkVac(ID.KimM, '2025-09-10', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-09-12', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-09-16', VacationType.QUARTER),
+  mkVac(ID.KimJ, '2025-09-17', VacationType.HALF_AM),
+  mkVac(ID.KimH, '2025-09-18', VacationType.HALF_AM),
+  mkVac(ID.Jang, '2025-09-22', VacationType.QUARTER),
+  mkVac(ID.KimS, '2025-09-22', VacationType.FULL),
+  mkVac(ID.Jang, '2025-09-23', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-09-23', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-09-23', VacationType.HALF_AM),
+  mkVac(ID.LeeM, '2025-09-26', VacationType.HALF_PM),
+  mkVac(ID.LeeH, '2025-09-26', VacationType.FULL),
+  mkVac(ID.Park, '2025-09-29', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-09-29', VacationType.FULL),
+  // 2025-10
+  mkVac(ID.LeeK, '2025-10-10', VacationType.FULL),
+  mkVac(ID.KimS, '2025-10-10', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-10-10', VacationType.FULL),
+  mkVac(ID.KimH, '2025-10-10', VacationType.FULL),
+  mkVac(ID.KimM, '2025-10-10', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-10-14', VacationType.QUARTER),
+  mkVac(ID.KimJ, '2025-10-15', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-10-16', VacationType.HALF_PM),
+  mkVac(ID.Jang, '2025-10-20', VacationType.HALF_AM),
+  mkVac(ID.KimH, '2025-10-27', VacationType.HALF_PM),
+  // 2025-11
+  mkVac(ID.KimS, '2025-11-03', VacationType.HALF_PM),
+  mkVac(ID.Jang, '2025-11-04', VacationType.QUARTER),
+  mkVac(ID.LeeM, '2025-11-04', VacationType.FULL),
+  mkVac(ID.Park, '2025-11-05', VacationType.HALF_PM),
+  mkVac(ID.Jang, '2025-11-07', VacationType.HALF_PM),
+  mkVac(ID.KimS, '2025-11-13', VacationType.FULL),
+  mkVac(ID.KimH, '2025-11-14', VacationType.HALF_AM),
+  mkVac(ID.LeeK, '2025-11-17', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-11-17', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-11-17', VacationType.FULL),
+  mkVac(ID.Jang, '2025-11-19', VacationType.HALF_AM),
+  mkVac(ID.Park, '2025-11-24', VacationType.FULL),
+  mkVac(ID.LeeH, '2025-11-24', VacationType.HALF_AM),
+  mkVac(ID.KimH, '2025-11-24', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-11-28', VacationType.FULL),
+  // 2025-12
+  mkVac(ID.LeeH, '2025-12-01', VacationType.FULL),
+  mkVac(ID.Jang, '2025-12-04', VacationType.HALF_PM),
+  mkVac(ID.Jang, '2025-12-05', VacationType.FULL),
+  mkVac(ID.KimS, '2025-12-05', VacationType.FULL),
+  mkVac(ID.KimH, '2025-12-05', VacationType.FULL),
+  mkVac(ID.LeeM, '2025-12-08', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-12-10', VacationType.QUARTER),
+  mkVac(ID.Park, '2025-12-12', VacationType.HALF_PM),
+  mkVac(ID.LeeM, '2025-12-17', VacationType.FULL),
+  mkVac(ID.Park, '2025-12-18', VacationType.QUARTER),
+  mkVac(ID.Jeon, '2025-12-19', VacationType.FULL),
+  mkVac(ID.Jang, '2025-12-22', VacationType.FULL),
+  mkVac(ID.Jang, '2025-12-26', VacationType.FULL),
+  mkVac(ID.LeeK, '2025-12-26', VacationType.FULL),
+  mkVac(ID.Jeon, '2025-12-26', VacationType.FULL),
+  mkVac(ID.KimM, '2025-12-26', VacationType.FULL),
+  mkVac(ID.KimJ, '2025-12-29', VacationType.FULL),
+  mkVac(ID.KimH, '2025-12-30', VacationType.FULL),
+  mkVac(ID.KimH, '2025-12-31', VacationType.FULL),
+  // 2026-01
+  mkVac(ID.KimH, '2026-01-02', VacationType.FULL),
+];
 
 const HOLIDAYS: Holiday[] = [
   { date: '2025-01-01', name: '신정' },

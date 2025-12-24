@@ -94,23 +94,23 @@ export const CalendarView: React.FC = () => {
         <div 
           key={day} 
           onClick={() => handleDayClick(dateStr)}
-          className={`min-h-[80px] md:min-h-[100px] p-1 border-r border-b border-gray-100 cursor-pointer transition-colors active:bg-gray-100 ${cellBgClass}`}
+          className={`min-h-[80px] md:min-h-[100px] p-0.5 md:p-1 border-r border-b border-gray-100 cursor-pointer transition-colors active:bg-gray-100 ${cellBgClass}`}
         >
-          <div className="flex justify-between items-start mb-1">
-            <span className={`text-xs md:text-sm font-semibold pl-1 ${dateTextColor}`}>
+          <div className="flex justify-between items-start mb-1 px-0.5">
+            <span className={`text-xs md:text-sm font-semibold pl-0.5 ${dateTextColor}`}>
               {day}
             </span>
             {isHoliday && (
-              <span className="text-[10px] text-red-500 font-medium pr-1 truncate max-w-[60px] md:max-w-none text-right">
+              <span className="text-[10px] text-red-500 font-medium pr-0.5 truncate max-w-[50px] md:max-w-none text-right">
                 {holiday.name}
               </span>
             )}
             {isToday && !isHoliday && (
-              <span className="text-[10px] text-blue-600 font-medium pr-1">오늘</span>
+              <span className="text-[10px] text-blue-600 font-medium pr-0.5">오늘</span>
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5 md:gap-1">
             {dayVacations.map(vac => {
               const empName = employees.find(e => e.id === vac.employeeId)?.name || 'Unknown';
               
@@ -121,10 +121,10 @@ export const CalendarView: React.FC = () => {
               return (
                 <div 
                   key={vac.id} 
-                  className={`text-[10px] md:text-xs px-1.5 py-1 rounded-md flex items-center justify-between border shadow-sm ${badgeStyle}`}
+                  className={`text-[10px] md:text-xs px-1 py-0.5 md:px-1.5 md:py-1 rounded-sm md:rounded-md flex items-center justify-between border shadow-sm ${badgeStyle}`}
                 >
-                  <span className="font-bold truncate mr-1">{empName}</span>
-                  <span className="opacity-80 text-[10px] whitespace-nowrap hidden md:inline-block">{vac.type}</span>
+                  <span className="font-bold whitespace-nowrap overflow-hidden text-ellipsis mr-0.5 tracking-tighter">{empName}</span>
+                  <span className="opacity-80 text-[9px] md:text-[10px] whitespace-nowrap hidden md:inline-block">{vac.type}</span>
                 </div>
               );
             })}
