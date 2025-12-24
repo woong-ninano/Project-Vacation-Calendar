@@ -1,5 +1,10 @@
-import { supabase } from './supabaseClient';
+import { supabase, isClientConfigured } from './supabaseClient';
 import { Employee, VacationEntry, VacationType, VACATION_COST, Holiday } from '../types';
+
+// Helper to check if Supabase is actually configured
+const isSupabaseConfigured = () => {
+  return isClientConfigured;
+};
 
 export const calculateManMonths = (start: string, end: string): number => {
   const startDate = new Date(start);
@@ -252,6 +257,7 @@ const HOLIDAYS: Holiday[] = [
 // --- Supabase Async Functions ---
 
 export const getEmployees = async (): Promise<Employee[]> => {
+  if (!isSupabaseConfigured()) return [];
   const { data, error } = await supabase.from('employees').select('*');
   if (error) {
     console.error('Error fetching employees:', error);
@@ -261,7 +267,7 @@ export const getEmployees = async (): Promise<Employee[]> => {
 };
 
 export const saveEmployee = async (employee: Employee): Promise<void> => {
-  // Upsert handles both insert and update if id exists
+  if (!isSupabaseConfigured()) return;
   const { error } = await supabase.from('employees').upsert(employee);
   if (error) console.error('Error saving employee:', error);
 };
@@ -271,11 +277,13 @@ export const updateEmployee = async (employee: Employee): Promise<void> => {
 };
 
 export const deleteEmployee = async (id: string): Promise<void> => {
+  if (!isSupabaseConfigured()) return;
   const { error } = await supabase.from('employees').delete().eq('id', id);
   if (error) console.error('Error deleting employee:', error);
 };
 
 export const getVacations = async (): Promise<VacationEntry[]> => {
+  if (!isSupabaseConfigured()) return [];
   const { data, error } = await supabase.from('vacations').select('*');
   if (error) {
     console.error('Error fetching vacations:', error);
@@ -285,6 +293,7 @@ export const getVacations = async (): Promise<VacationEntry[]> => {
 };
 
 export const addVacation = async (employeeId: string, date: string, type: VacationType): Promise<void> => {
+  if (!isSupabaseConfigured()) return;
   const newEntry: VacationEntry = {
     id: `vac_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     employeeId,
@@ -298,6 +307,7 @@ export const addVacation = async (employeeId: string, date: string, type: Vacati
 };
 
 export const removeVacation = async (id: string): Promise<void> => {
+  if (!isSupabaseConfigured()) return;
   const { error } = await supabase.from('vacations').delete().eq('id', id);
   if (error) console.error('Error removing vacation:', error);
 };
@@ -308,6 +318,11 @@ export const getHolidays = (): Holiday[] => {
 
 // --- Seed Function ---
 export const seedDatabase = async () => {
+  if (!isSupabaseConfigured()) {
+    alert('Supabase 설정이 완료되지 않았습니다. .env 파일을 확인해주세요.');
+    return false;
+  }
+  
   // Check if data exists
   const { count } = await supabase.from('employees').select('*', { count: 'exact', head: true });
   
