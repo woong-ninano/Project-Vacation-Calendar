@@ -4,7 +4,7 @@ import { getEmployees, getVacations, removeVacation, getHolidays } from '../serv
 import { Employee, VacationEntry, VacationType, Holiday } from '../types';
 
 export const CalendarView: React.FC = () => {
-  // Initialize with current date as requested
+  // Initialize with today's date
   const [currentDate, setCurrentDate] = useState(new Date());
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [vacations, setVacations] = useState<VacationEntry[]>([]);
