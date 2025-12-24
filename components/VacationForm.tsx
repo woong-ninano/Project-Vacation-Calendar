@@ -15,22 +15,22 @@ export const VacationForm: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(today);
   
   const [vacationType, setVacationType] = useState<VacationType>(VacationType.FULL);
-
-  const refreshData = () => {
-    const data = getEmployees();
-    setEmployees(data);
-    if (data.length > 0 && !selectedEmpId) {
-      setSelectedEmpId(data[0].id);
-    }
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    const refreshData = async () => {
+      const data = await getEmployees();
+      setEmployees(data);
+      if (data.length > 0 && !selectedEmpId) {
+        setSelectedEmpId(data[0].id);
+      }
+    };
     refreshData();
   }, []);
 
-  const handleVacationSubmit = (e: React.FormEvent) => {
+  const handleVacationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedEmpId) return;
+    if (!selectedEmpId || isSubmitting) return;
     
     // Validate Dates
     const start = new Date(startDate);
@@ -41,18 +41,23 @@ export const VacationForm: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     // Iterate through dates
     let currentDate = new Date(start);
     let count = 0;
 
+    const promises = [];
     while (currentDate <= end) {
       const dateStr = currentDate.toISOString().split('T')[0];
-      addVacation(selectedEmpId, dateStr, vacationType);
+      promises.push(addVacation(selectedEmpId, dateStr, vacationType));
       
       // Move to next day
       currentDate.setDate(currentDate.getDate() + 1);
       count++;
     }
+
+    await Promise.all(promises);
 
     window.dispatchEvent(new Event('data-updated'));
     alert(`총 ${count}일의 휴가가 등록되었습니다.`);
@@ -60,6 +65,7 @@ export const VacationForm: React.FC = () => {
     // Reset dates to today
     setStartDate(today);
     setEndDate(today);
+    setIsSubmitting(false);
   };
 
   return (
@@ -151,14 +157,14 @@ export const VacationForm: React.FC = () => {
 
           <button 
             type="submit" 
-            disabled={employees.length === 0}
+            disabled={employees.length === 0 || isSubmitting}
             className={`w-full font-bold py-3.5 rounded-lg shadow-md transition-colors mt-4 ${
-              employees.length === 0 
+              employees.length === 0 || isSubmitting
               ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
               : 'bg-indigo-600 hover:bg-indigo-700 text-white'
             }`}
           >
-            휴가 등록하기
+            {isSubmitting ? '등록 중...' : '휴가 등록하기'}
           </button>
         </form>
       </div>

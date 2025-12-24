@@ -1,7 +1,5 @@
+import { supabase } from './supabaseClient';
 import { Employee, VacationEntry, VacationType, VACATION_COST, Holiday } from '../types';
-
-const STORAGE_KEY_EMPLOYEES = 'pvc_employees_v6';
-const STORAGE_KEY_VACATIONS = 'pvc_vacations_v6';
 
 export const calculateManMonths = (start: string, end: string): number => {
   const startDate = new Date(start);
@@ -12,11 +10,11 @@ export const calculateManMonths = (start: string, end: string): number => {
   const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
   
-  // Approximate 1 month as 30.4 days for MM calculation
   const mm = (diffDays / 30.4).toFixed(1); 
   return parseFloat(mm);
 };
 
+// --- Initial Data for Seeding ---
 const createInitialEmployee = (id: string, name: string, start: string, end: string): Employee => {
   const mm = calculateManMonths(start, end);
   return {
@@ -42,7 +40,6 @@ const INITIAL_EMPLOYEES: Employee[] = [
   createInitialEmployee('emp_9', '김미나', '2025-02-03', '2026-02-13'),
 ];
 
-// Helper to seed vacations
 let vacIdCounter = 1;
 const mkVac = (empId: string, date: string, type: VacationType): VacationEntry => ({
   id: `vac_seed_v6_${vacIdCounter++}`,
@@ -52,7 +49,6 @@ const mkVac = (empId: string, date: string, type: VacationType): VacationEntry =
   cost: VACATION_COST[type]
 });
 
-// Mapping for readability
 const ID = {
   Jang: 'emp_1',
   Park: 'emp_10',
@@ -253,51 +249,42 @@ const HOLIDAYS: Holiday[] = [
   { date: '2026-02-19', name: '설날 연휴' },
 ];
 
-export const getEmployees = (): Employee[] => {
-  const data = localStorage.getItem(STORAGE_KEY_EMPLOYEES);
-  if (!data) {
-    localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(INITIAL_EMPLOYEES));
-    return INITIAL_EMPLOYEES;
+// --- Supabase Async Functions ---
+
+export const getEmployees = async (): Promise<Employee[]> => {
+  const { data, error } = await supabase.from('employees').select('*');
+  if (error) {
+    console.error('Error fetching employees:', error);
+    return [];
   }
-  return JSON.parse(data);
+  return data as Employee[];
 };
 
-export const saveEmployee = (employee: Employee): void => {
-  const employees = getEmployees();
-  const index = employees.findIndex(e => e.id === employee.id);
-  if (index >= 0) {
-    employees[index] = employee;
-  } else {
-    employees.push(employee);
+export const saveEmployee = async (employee: Employee): Promise<void> => {
+  // Upsert handles both insert and update if id exists
+  const { error } = await supabase.from('employees').upsert(employee);
+  if (error) console.error('Error saving employee:', error);
+};
+
+export const updateEmployee = async (employee: Employee): Promise<void> => {
+  await saveEmployee(employee);
+};
+
+export const deleteEmployee = async (id: string): Promise<void> => {
+  const { error } = await supabase.from('employees').delete().eq('id', id);
+  if (error) console.error('Error deleting employee:', error);
+};
+
+export const getVacations = async (): Promise<VacationEntry[]> => {
+  const { data, error } = await supabase.from('vacations').select('*');
+  if (error) {
+    console.error('Error fetching vacations:', error);
+    return [];
   }
-  localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(employees));
+  return data as VacationEntry[];
 };
 
-export const updateEmployee = (employee: Employee): void => {
-  saveEmployee(employee);
-};
-
-export const deleteEmployee = (id: string): void => {
-  let employees = getEmployees();
-  employees = employees.filter(e => e.id !== id);
-  localStorage.setItem(STORAGE_KEY_EMPLOYEES, JSON.stringify(employees));
-  
-  let vacations = getVacations();
-  vacations = vacations.filter(v => v.employeeId !== id);
-  localStorage.setItem(STORAGE_KEY_VACATIONS, JSON.stringify(vacations));
-};
-
-export const getVacations = (): VacationEntry[] => {
-  const data = localStorage.getItem(STORAGE_KEY_VACATIONS);
-  if (!data) {
-    localStorage.setItem(STORAGE_KEY_VACATIONS, JSON.stringify(INITIAL_VACATIONS));
-    return INITIAL_VACATIONS;
-  }
-  return JSON.parse(data);
-};
-
-export const addVacation = (employeeId: string, date: string, type: VacationType): void => {
-  const vacations = getVacations();
+export const addVacation = async (employeeId: string, date: string, type: VacationType): Promise<void> => {
   const newEntry: VacationEntry = {
     id: `vac_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     employeeId,
@@ -305,21 +292,33 @@ export const addVacation = (employeeId: string, date: string, type: VacationType
     type,
     cost: VACATION_COST[type]
   };
-  vacations.push(newEntry);
-  localStorage.setItem(STORAGE_KEY_VACATIONS, JSON.stringify(vacations));
+  
+  const { error } = await supabase.from('vacations').insert(newEntry);
+  if (error) console.error('Error adding vacation:', error);
 };
 
-export const removeVacation = (id: string): void => {
-  const vacations = getVacations().filter(v => v.id !== id);
-  localStorage.setItem(STORAGE_KEY_VACATIONS, JSON.stringify(vacations));
-};
-
-export const getEmployeeUsage = (employeeId: string) => {
-  const vacations = getVacations().filter(v => v.employeeId === employeeId);
-  const used = vacations.reduce((acc, curr) => acc + curr.cost, 0);
-  return used;
+export const removeVacation = async (id: string): Promise<void> => {
+  const { error } = await supabase.from('vacations').delete().eq('id', id);
+  if (error) console.error('Error removing vacation:', error);
 };
 
 export const getHolidays = (): Holiday[] => {
   return HOLIDAYS;
+};
+
+// --- Seed Function ---
+export const seedDatabase = async () => {
+  // Check if data exists
+  const { count } = await supabase.from('employees').select('*', { count: 'exact', head: true });
+  
+  if (count === 0) {
+    const { error: empError } = await supabase.from('employees').insert(INITIAL_EMPLOYEES);
+    if (empError) console.error('Seed Employees Error:', empError);
+    
+    const { error: vacError } = await supabase.from('vacations').insert(INITIAL_VACATIONS);
+    if (vacError) console.error('Seed Vacations Error:', vacError);
+    
+    return true;
+  }
+  return false;
 };

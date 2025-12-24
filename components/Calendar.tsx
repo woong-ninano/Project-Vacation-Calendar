@@ -16,9 +16,14 @@ export const CalendarView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    setEmployees(getEmployees());
-    setVacations(getVacations());
-    setHolidays(getHolidays());
+    const fetchData = async () => {
+      const emps = await getEmployees();
+      const vacs = await getVacations();
+      setEmployees(emps);
+      setVacations(vacs);
+      setHolidays(getHolidays());
+    };
+    fetchData();
   }, [tick]);
 
   useEffect(() => {
@@ -31,9 +36,9 @@ export const CalendarView: React.FC = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1));
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('정말 이 휴가 기록을 삭제하시겠습니까?')) {
-      removeVacation(id);
+      await removeVacation(id);
       window.dispatchEvent(new Event('data-updated'));
     }
   };

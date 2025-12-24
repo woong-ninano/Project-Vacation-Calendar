@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Employee, VacationEntry } from '../types';
-import { getEmployees, getVacations, saveEmployee, updateEmployee, deleteEmployee, calculateManMonths } from '../services/dataService';
-import { Users, CalendarRange, Edit2, Trash2, PlusCircle, Check, X } from 'lucide-react';
+import { getEmployees, getVacations, saveEmployee, updateEmployee, deleteEmployee, calculateManMonths, seedDatabase } from '../services/dataService';
+import { Users, CalendarRange, Edit2, Trash2, PlusCircle, Check, X, Database } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -16,14 +16,21 @@ export const Dashboard: React.FC = () => {
   const [newEmpName, setNewEmpName] = useState('');
   const [newEmpStart, setNewEmpStart] = useState('2025-01-01');
   const [newEmpEnd, setNewEmpEnd] = useState('2025-12-31');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setEmployees(getEmployees());
-    setVacations(getVacations());
+    const loadData = async () => {
+      const emps = await getEmployees();
+      const vacs = await getVacations();
+      setEmployees(emps);
+      setVacations(vacs);
+    };
+    loadData();
   }, [tick]);
 
   useEffect(() => {
     const handleRefresh = () => setTick(t => t + 1);
+    window.dispatchEvent(new Event('data-updated')); // Initial Trigger for other components if needed
     window.addEventListener('data-updated', handleRefresh);
     return () => window.removeEventListener('data-updated', handleRefresh);
   }, []);
@@ -64,23 +71,23 @@ export const Dashboard: React.FC = () => {
     setEditForm(updatedForm);
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (editingId && editForm.name && editForm.startDate && editForm.endDate) {
-      updateEmployee(editForm as Employee);
+      await updateEmployee(editForm as Employee);
       setEditingId(null);
       window.dispatchEvent(new Event('data-updated'));
     }
   };
 
-  const handleDeleteEmployee = (id: string) => {
+  const handleDeleteEmployee = async (id: string) => {
     if (window.confirm('정말 삭제하시겠습니까? 해당 인원의 모든 휴가 기록도 삭제됩니다.')) {
-      deleteEmployee(id);
+      await deleteEmployee(id);
       window.dispatchEvent(new Event('data-updated'));
     }
   };
 
   // --- Create Logic ---
-  const handleAddEmployee = (e: React.FormEvent) => {
+  const handleAddEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
     const mm = calculateManMonths(newEmpStart, newEmpEnd);
     
@@ -92,7 +99,7 @@ export const Dashboard: React.FC = () => {
       manMonths: mm,
       totalVacationDays: mm // Rule: Vacation Days = MM
     };
-    saveEmployee(newEmp);
+    await saveEmployee(newEmp);
     window.dispatchEvent(new Event('data-updated'));
     
     // Reset
@@ -100,9 +107,35 @@ export const Dashboard: React.FC = () => {
     alert('신규 인원이 등록되었습니다.');
   };
 
+  const handleSeed = async () => {
+    if (window.confirm('DB가 비어있을 경우 초기 데이터를 업로드합니다. 진행하시겠습니까?')) {
+      setIsLoading(true);
+      const success = await seedDatabase();
+      setIsLoading(false);
+      if (success) {
+        alert('초기 데이터가 성공적으로 업로드되었습니다.');
+        window.dispatchEvent(new Event('data-updated'));
+      } else {
+        alert('데이터가 이미 존재하거나 업로드에 실패했습니다.');
+      }
+    }
+  };
+
   return (
     <div className="p-4 max-w-5xl mx-auto space-y-8 pb-24">
       
+      {/* Utility Bar */}
+      <div className="flex justify-end">
+        <button 
+          onClick={handleSeed} 
+          disabled={isLoading}
+          className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded flex items-center gap-1 transition-colors"
+        >
+          <Database size={14} />
+          {isLoading ? '업로드 중...' : 'DB 초기화 (데이터 업로드)'}
+        </button>
+      </div>
+
       {/* Employee Cards */}
       <section>
         <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
